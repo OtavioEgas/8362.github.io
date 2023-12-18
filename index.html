@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cédera Search</title>
+  <style>
+    body {
+      margin: 0;
+      background-image: url('https://64.media.tumblr.com/3509d89e124aa26637fdb4eed0ef2454/tumblr_ola2iuk8Xo1tixvyxo1_400.gif');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: 'Times New Roman', serif;
+    }
+
+    #search-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #cedera-logo {
+      font-family: 'Times New Roman', serif;
+      font-size: 50px;
+      font-weight: bold;
+      color: #800080;
+      margin-bottom: 20px;
+    }
+
+    #search-box-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #search-box {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    #search-engine {
+      width: 80%;
+      max-width: 400px;
+      padding: 5px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    #enter-emoji {
+      font-size: 50px;
+      margin-left: 5px;
+      cursor: pointer;
+      color: #800080;
+    }
+
+    #status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(128, 0, 128, 0.3);
+      text-align: center;
+      padding: 10px;
+      font-size: 20px;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="search-container">
+    <div id="cedera-logo">Cédera</div>
+    <div id="search-box-container">
+      <input type="text" id="search-box" placeholder="Pesquisar..." onkeyup="checkEnter(event)">
+      <select id="search-engine" onchange="changeSearchEngine()">
+        <option value="startpage">StartPage</option>
+        <option value="yandex">Yandex</option>
+        <option value="duckduckgo">DuckDuckGo</option>
+        <option value="bing">Bing</option>
+        <option value="yahoo">Yahoo</option>
+      </select>
+    </div>
+    <span id="enter-emoji" role="img" aria-label="Enter Emoji" onclick="search()">⏎</span>
+    <div id="status-bar"></div>
+  </div>
+
+  <script>
+    var selectedSearchEngine = 'startpage';
+
+    function changeSearchEngine() {
+      selectedSearchEngine = document.getElementById('search-engine').value;
+    }
+
+    function search() {
+      var query = document.getElementById('search-box').value;
+      var searchUrl = getSearchUrl(selectedSearchEngine, query);
+      window.open(searchUrl, '_blank');
+    }
+
+    function getSearchUrl(engine, query) {
+      switch (engine) {
+        case 'startpage':
+          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
+        case 'yandex':
+          return 'https://www.yandex.com/search/?text=' + encodeURIComponent(query);
+        case 'duckduckgo':
+          return 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
+        case 'bing':
+          return 'https://www.bing.com/search?q=' + encodeURIComponent(query);
+        case 'yahoo':
+          return 'https://search.yahoo.com/search?p=' + encodeURIComponent(query);
+        default:
+          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
+      }
+    }
+
+    function detectDevice() {
+      var statusBar = document.getElementById('status-bar');
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        statusBar.textContent = 'Você está em um dispositivo móvel';
+        adjustLayoutForMobile();
+      } else {
+        statusBar.textContent = 'Você está em um computador';
+      }
+
+      statusBar.innerHTML += '<br>' + navigator.userAgent;
+
+      fetch('https://ipinfo.io/json')
+        .then(response => response.json())
+        .then(data => {
+          statusBar.innerHTML += '<br>IP: ' + data.ip + ', Cidade: ' + data.city;
+        })
+        .catch(error => console.error('Erro ao obter informações de localização:', error));
+    }
+
+    function adjustLayoutForMobile() {
+      document.getElementById('status-bar').style.fontSize = '10px';
+    }
+
+    function checkEnter(event) {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        search();
+      }
+    }
+
+    document.getElementById('search-box').addEventListener('keyup', function(event) {
+      checkEnter(event);
+    });
+
+    detectDevice();
+  </script>
+</body>
+</html>
