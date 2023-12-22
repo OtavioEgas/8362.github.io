@@ -1,162 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cédera Search</title>
-  <style>
-    body {
-      margin: 0;
-      background-image: url('https://64.media.tumblr.com/3509d89e124aa26637fdb4eed0ef2454/tumblr_ola2iuk8Xo1tixvyxo1_400.gif');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      font-family: 'Times New Roman', serif;
-    }
-
-    #search-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-
-    #cedera-logo {
-      font-family: 'Times New Roman', serif;
-      font-size: 50px;
-      font-weight: bold;
-      color: #800080;
-      margin-bottom: 20px;
-    }
-
-    #search-box-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #search-box {
-      width: 80%;
-      max-width: 400px;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-
-    #search-engine {
-      width: 80%;
-      max-width: 400px;
-      padding: 5px;
-      font-size: 14px;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-
-    #enter-emoji {
-      font-size: 50px;
-      margin-left: 5px;
-      cursor: pointer;
-      color: #800080;
-    }
-
-    #status-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: rgba(128, 0, 128, 0.3);
-      text-align: center;
-      padding: 10px;
-      font-size: 20px;
-      color: #fff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat em Tempo Real com WebRTC e Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/9.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.3.0/firebase-database.js"></script>
 </head>
 <body>
-  <div id="search-container">
-    <div id="cedera-logo">Cédera</div>
-    <div id="search-box-container">
-      <input type="text" id="search-box" placeholder="Pesquisar..." onkeyup="checkEnter(event)">
-      <select id="search-engine" onchange="changeSearchEngine()">
-        <option value="startpage">StartPage</option>
-        <option value="yandex">Yandex</option>
-        <option value="duckduckgo">DuckDuckGo</option>
-        <option value="bing">Bing</option>
-        <option value="yahoo">Yahoo</option>
-      </select>
+
+<div>
+    <div>
+        <label for="username">Usuário:</label>
+        <input type="text" id="username">
     </div>
-    <span id="enter-emoji" role="img" aria-label="Enter Emoji" onclick="search()">⏎</span>
-    <div id="status-bar"></div>
-  </div>
+    <div>
+        <label for="message">Mensagem:</label>
+        <input type="text" id="message">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <div>
+        <ul id="chat"></ul>
+    </div>
+</div>
 
-  <script>
-    var selectedSearchEngine = 'startpage';
+<script>
+    // Substitua estas configurações com as do seu projeto Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBglmUN6hylmO8xYmjQzUXjz_LaITif9bw",
+        authDomain: "chat-d7975.firebaseapp.com",
+        projectId: "chat-d7975",
+        storageBucket: "chat-d7975.appspot.com",
+        messagingSenderId: "309856740717",
+        appId: "1:309856740717:web:b0807a21b06664a58ce664",
+        measurementId: "G-PGML2EMEEX"
+    };
 
-    function changeSearchEngine() {
-      selectedSearchEngine = document.getElementById('search-engine').value;
+    firebase.initializeApp(firebaseConfig);
+
+    const database = firebase.database();
+
+    const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    const peerConnection = new RTCPeerConnection(configuration);
+    const dataChannel = peerConnection.createDataChannel('chat');
+
+    // Configuração da sinalização usando o Firebase
+    const chatRoom = 'suaSalaDeChat'; // Substitua com um identificador único para sua sala de chat
+    const chatRef = database.ref(`/chats/${chatRoom}`);
+
+    // Adiciona os eventos para sinalização
+    chatRef.on('child_added', handleSignalData);
+
+    function handleSignalData(snapshot) {
+        const signal = snapshot.val();
+        if (signal) {
+            if (signal.iceCandidate) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(signal.iceCandidate));
+            } else if (signal.offer) {
+                handleOffer(signal.offer);
+            } else if (signal.answer) {
+                handleAnswer(signal.answer);
+            }
+        }
     }
 
-    function search() {
-      var query = document.getElementById('search-box').value;
-      var searchUrl = getSearchUrl(selectedSearchEngine, query);
-      window.open(searchUrl, '_blank');
+    function handleOffer(offer) {
+        peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        peerConnection.createAnswer()
+            .then(answer => peerConnection.setLocalDescription(answer))
+            .then(() => {
+                chatRef.push({ answer: peerConnection.localDescription });
+            });
     }
 
-    function getSearchUrl(engine, query) {
-      switch (engine) {
-        case 'startpage':
-          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
-        case 'yandex':
-          return 'https://www.yandex.com/search/?text=' + encodeURIComponent(query);
-        case 'duckduckgo':
-          return 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
-        case 'bing':
-          return 'https://www.bing.com/search?q=' + encodeURIComponent(query);
-        case 'yahoo':
-          return 'https://search.yahoo.com/search?p=' + encodeURIComponent(query);
-        default:
-          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
-      }
+    function handleAnswer(answer) {
+        peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     }
 
-    function detectDevice() {
-      var statusBar = document.getElementById('status-bar');
-      if (/Mobi|Android/i.test(navigator.userAgent)) {
-        statusBar.textContent = 'Você está em um dispositivo móvel';
-        adjustLayoutForMobile();
-      } else {
-        statusBar.textContent = 'Você está em um computador';
-      }
+    // Adiciona lógica de sinalização ao enviar mensagem
+    dataChannel.onopen = () => {
+        console.log('Conexão de dados aberta.');
+    };
 
-      statusBar.innerHTML += '<br>' + navigator.userAgent;
+    dataChannel.onmessage = event => {
+        appendMessage(event.data);
+    };
 
-      fetch('https://ipinfo.io/json')
-        .then(response => response.json())
-        .then(data => {
-          statusBar.innerHTML += '<br>IP: ' + data.ip + ', Cidade: ' + data.city;
-        })
-        .catch(error => console.error('Erro ao obter informações de localização:', error));
+    function sendMessage() {
+        const username = document.getElementById('username').value;
+        const message = document.getElementById('message').value;
+
+        if (username && message) {
+            const msg = `${username}: ${message}`;
+            appendMessage(msg);
+            dataChannel.send(msg);
+            document.getElementById('message').value = '';
+        }
     }
 
-    function adjustLayoutForMobile() {
-      document.getElementById('status-bar').style.fontSize = '10px';
+    function appendMessage(msg) {
+        const chat = document.getElementById('chat');
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(msg));
+        chat.appendChild(li);
     }
 
-    function checkEnter(event) {
-      if (event.key === 'Enter' || event.keyCode === 13) {
-        search();
-      }
-    }
+    // Configuração inicial
+    peerConnection.createOffer()
+        .then(offer => peerConnection.setLocalDescription(offer))
+        .then(() => {
+            chatRef.push({ offer: peerConnection.localDescription });
+        });
 
-    document.getElementById('search-box').addEventListener('keyup', function(event) {
-      checkEnter(event);
-    });
+</script>
 
-    detectDevice();
-  </script>
 </body>
 </html>
