@@ -1,250 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cédera Search</title>
-  <style>
-  
-           #about-content {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      font-size: 15px;
-      color: #800080; /* Cor roxa */
-      font-family: 'Times New Roman', serif;
-      z-index: 1; /* Garante que o conteúdo "Sobre" apareça acima do wallpaper */
-      background: rgba(255, 255, 255, 0.7); /* Fundo branco transparente */
-      padding: 20px; /* Adiciona algum espaçamento ao redor do texto */
-    }
-
-    body {
-      margin: 0;
-      background-image: url('https://64.media.tumblr.com/3509d89e124aa26637fdb4eed0ef2454/tumblr_ola2iuk8Xo1tixvyxo1_400.gif');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      font-family: 'Times New Roman', serif;
-      height: 100vh; /* Garante que o corpo ocupe a altura total da janela de visualização */
-    }
-
-    #content-container {
-      position: relative;
-      z-index: 2; /* Garante que o conteúdo principal esteja acima do wallpaper */
-    }
-
-    body {
-      margin: 0;
-      background-image: url('https://64.media.tumblr.com/3509d89e124aa26637fdb4eed0ef2454/tumblr_ola2iuk8Xo1tixvyxo1_400.gif');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      font-family: 'Times New Roman', serif;
-      height: 100vh; /* Garante que o corpo ocupe a altura total da janela de visualização */
-      overflow: hidden; /* Impede a rolagem do corpo para garantir a rolagem apenas no conteúdo */
-    }
-
-    #navbar {
-      background-color: rgba(128, 0, 128, 0.3); /* Lilás com 30% de transparência */
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 3; /* Garante que a barra de navegação esteja acima do wallpaper */
-      display: flex;
-      justify-content: space-between; /* Alinha os itens nos cantos e no centro */
-      padding: 0px; /* Adiciona algum espaçamento interno para melhor visualização */
-    }
-
-    #navbar a {
-      float: left;
-      display: block;
-      color: #f2f2f2; /* Cor do texto dos botões na barra de navegação */
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none;
-    }
-
-    #navbar a:hover {
-      background-color: #ddd; /* Cor de fundo ao passar o mouse sobre os botões */
-      color: black; /* Cor do texto ao passar o mouse sobre os botões */
-    }
-    
-    #search-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-
-    #cedera-logo {
-      font-family: 'Times New Roman', serif;
-      font-size: 50px;
-      font-weight: bold;
-      color: #800080; /* Cor roxa */
-      margin-bottom: 20px;
-    }
-
-    #search-box-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #search-box {
-      width: 80%;
-      max-width: 400px;
-      padding: 10px;
-      border: 2px solid #800080; /* Adiciona bordas roxas */
-      border-radius: 10px;
-      font-size: 16px;
-      margin-bottom: 10px;
-      background-color: rgba(255, 255, 255, 0.30); /* Fundo branco transparente 50% */
-    }
-
-
-    #search-engine {
-      width: 80%; /* Ajustando a largura para 80% da largura da tela */
-      max-width: 400px; /* Definindo uma largura máxima para garantir uma aparência agradável */
-      padding: 5px;
-      font-size: 14px;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-
-    #enter-emoji {
-      font-size: 50px; /* Aumentando o tamanho do emoji para 50 */
-      margin-left: 5px;
-      cursor: pointer; /* Adicionando cursor apontando para indicar que é clicável */
-      color: #800080; /* Definindo a cor roxa */
-    }
-
-    #status-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: rgba(128, 0, 128, 0.3); /* Lilás com 30% de transparência */
-      text-align: center;
-      padding: 10px;
-      font-size: 20px; /* Tamanho da fonte padrão */
-      color: #fff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft-like Game</title>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
-  <div id="content-container">
-    <div id="navbar">
-      <a href="#home" class="selected">Home</a>
-         <a href="#about" onclick="showAbout()">Sobre</a>
-      <a href="#config" onclick="hideAbout()">Config</a>
-   </div>
+    <script>
+        // Configuração da cena
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xdddddd);
 
-  <div id="search-container">
-    <div id="cedera-logo">Cédera</div>
-    <div id="search-box-container">
-      <input type="text" id="search-box" placeholder="Pesquisar..." onkeyup="checkEnter(event)">
-      <select id="search-engine" onchange="changeSearchEngine()">
-        <option value="startpage">StartPage</option>
-        <option value="yandex">Yandex</option>
-        <option value="duckduckgo">DuckDuckGo</option>
-        <option value="bing">Bing</option>
-        <option value="yahoo">Yahoo</option>
-      </select>
-    </div>
-    <span id="enter-emoji" role="img" aria-label="Enter Emoji" onclick="search()">⏎</span>
-    <div id="status-bar"></div>
-  </div>
-    <div id="about-content">
-    Cédera é um mini projeto open-source projetado para usuários que gostam de navegar com diversidade e no modo underground.
-  </div>
+        // Configuração da câmera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
 
-  <script>
-    function showAbout() {
-      document.getElementById('about-content').style.display = 'block';
-      document.getElementById('search-container').style.display = 'none';
-    }
+        // Configuração da renderização
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    function hideAbout() {
-      document.getElementById('about-content').style.display = 'none';
-      document.getElementById('search-container').style.display = 'flex';
-    }
+        // Adiciona um cubo (bloco 3D) à cena
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
 
-    // Adicione estas linhas abaixo para vincular as funções aos links
-    document.getElementById('navbar').getElementsByTagName('a')[1].addEventListener('click', showAbout);
-    document.getElementById('navbar').getElementsByTagName('a')[0].addEventListener('click', hideAbout);
-    document.getElementById('navbar').getElementsByTagName('a')[2].addEventListener('click', hideAbout);
+        // Adiciona um plano para representar o solo
+        const groundGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+        const groundMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, wireframe: true });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
 
-    var selectedSearchEngine = 'startpage';
+        // Adiciona controles para movimento
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        
+        // Atualiza a câmera ao redimensionar a janela
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+            
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
 
-    function changeSearchEngine() {
-      selectedSearchEngine = document.getElementById('search-engine').value;
-    }
+            renderer.setSize(newWidth, newHeight);
+        });
 
-    function search() {
-      var query = document.getElementById('search-box').value;
-      var searchUrl = getSearchUrl(selectedSearchEngine, query);
-      window.open(searchUrl, '_blank');
-    }
+        // Função de animação
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
 
-    function getSearchUrl(engine, query) {
-      switch (engine) {
-        case 'startpage':
-          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
-        case 'yandex':
-          return 'https://www.yandex.com/search/?text=' + encodeURIComponent(query);
-        case 'duckduckgo':
-          return 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
-        case 'bing':
-          return 'https://www.bing.com/search?q=' + encodeURIComponent(query);
-        case 'yahoo':
-          return 'https://search.yahoo.com/search?p=' + encodeURIComponent(query);
-        default:
-          return 'https://www.startpage.com/do/search?q=' + encodeURIComponent(query);
-      }
-    }
-
-    function detectDevice() {
-      var statusBar = document.getElementById('status-bar');
-      if (/Mobi|Android/i.test(navigator.userAgent)) {
-        statusBar.textContent = 'Você está em um dispositivo móvel';
-        adjustLayoutForMobile();
-      } else {
-        statusBar.textContent = 'Você está em um computador';
-      }
-
-      statusBar.innerHTML += '<br>' + navigator.userAgent;
-
-      fetch('https://ipinfo.io/json')
-        .then(response => response.json())
-        .then(data => {
-          statusBar.innerHTML += '<br>IP: ' + data.ip + ', Cidade: ' + data.city;
-        })
-        .catch(error => console.error('Erro ao obter informações de localização:', error));
-    }
-
-    function adjustLayoutForMobile() {
-      document.getElementById('status-bar').style.fontSize = '10px';
-    }
-
-    function checkEnter(event) {
-      if (event.key === 'Enter' || event.keyCode === 13) {
-        search();
-      }
-    }
-
-    document.getElementById('search-box').addEventListener('keyup', function(event) {
-      checkEnter(event);
-    });
-
-    detectDevice();
-    
-  </script>
+        // Inicia a animação
+        animate();
+    </script>
 </body>
 </html>
